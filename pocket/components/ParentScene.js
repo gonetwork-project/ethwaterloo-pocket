@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity,TextInput,Button } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Button } from 'react-native';
 
 
 import TwoInputs from './common/TwoInputs';
@@ -15,69 +15,79 @@ class ParentScene extends Component {
     render() {
         const { container, bottomSpace, tosBox } = styles;
         return (
-            <View style={[{ flex: 1, paddingTop: 50, flexDirection: 'column',
-            justifyContent: 'space-between', }]}>
+            <View style={[{
+                flex: 1, paddingTop: 50, flexDirection: 'column',
+                justifyContent: 'space-between',
+            }]}>
 
-            <View style={[{ flex: 0.5, paddingTop: 0, justifyContent: 'center',
-    alignItems: 'center',}]}>
-                <Text style={styles.welcome}>
-                    Balance: 30
-                 </Text>
-            </View>
+                <View style={[{
+                    flex: 0.5, paddingTop: 0, justifyContent: 'center',
+                    alignItems: 'center',
+                }]}>
+                    <Text style={[globalStyle.gloabalFontStyle_H2]}>
+                        Balance: {this.props.state.parentBalance}
+                    </Text>
+                </View>
 
-            <View style={[{ flex: 1, paddingTop: 30, justifyContent: 'center',
-    alignItems: 'center',}]}>
-                <RedButton
-                    style={[{
-                        width: 260,
-                        height: 70,justifyContent: 'center',
-                    }]}
-                    onPress={this.props.createDebitCardAction.bind(this)}
-                >
-                    Create Debit Card
+                <View style={[{
+                    flex: 1, paddingTop: 30, justifyContent: 'center',
+                    alignItems: 'center',
+                }]}>
+                    <RedButton
+                        style={[{
+                            width: 260,
+                            height: 70, justifyContent: 'center',
+                        }]}
+                        onPress={this.props.createDebitCardAction.bind(this)}
+                    >
+                        Create Debit Card
                      </RedButton>
-            </View>
-            <View style={[{ flex: 1.5, paddingTop: 50, justifyContent: 'center',
-    alignItems: 'center',}]}>
-                 <TextInput style={{height: 50,}} placeholder="Type here to translate!"
-                 
-                />
-                <RedButton
-                    style={[{
-                        width: 100,
-                        height: 50, alignItems: 'center',justifyContent: 'center',
-                    }]}
-                    onPress={this.props.setSpendAction.bind(this)}
-                >
-                    Set Spend
+                </View>
+                <View style={[{
+                    flex: 1.5, paddingTop: 50, justifyContent: 'center',
+                    alignItems: 'center',
+                }]}>
+                    <TextInput style={{ height: 50, }} placeholder="Set spenditure limite"
+
+                    />
+                    <RedButton
+                        style={[{
+                            width: 100,
+                            height: 50, alignItems: 'center', justifyContent: 'center',
+                        }]}
+                        onPress={this.props.setSpendAction.bind(this)}
+                    >
+                        Set Spend
                      </RedButton>
-            </View>
-            <View style={[{ flex: 1.5, paddingTop: 50, justifyContent: 'center',
-    alignItems: 'center',}]}>
+                </View>
+                <View style={[{
+                    flex: 1.5, paddingTop: 50, justifyContent: 'center',
+                    alignItems: 'center',
+                }]}>
 
-<TextInput  style={{height: 50,  }} placeholder="Type here to translate!"/>
-                <RedButton
-                    style={[{
-                        width: 100,
-                        height: 50, alignItems: 'center',justifyContent: 'center',
-                    }]}
-                    onPress={this.props.fundAction.bind(this)}
-                >
-                    Fund
+                    <TextInput style={{ height: 50, }} placeholder="Fund an account" />
+                    <RedButton
+                        style={[{
+                            width: 100,
+                            height: 50, alignItems: 'center', justifyContent: 'center',
+                        }]}
+                        onPress={this.props.fundAction.bind(this)}
+                    >
+                        Fund
                      </RedButton>
-            </View>
-            <View style={[{ flex: 1, paddingTop: 50, justifyContent: 'center',
-    alignItems: 'center',}]}>
+                </View>
+                <View style={[{
+                    flex: 1, paddingTop: 50, justifyContent: 'center',
+                    alignItems: 'center',
+                }]}>
 
-<Button
-raised
-title='BUTTON WITH ICON' />
-            </View>
 
-            <View style={[{ flex: 2, paddingTop: 0,}]}>
+                </View>
 
-            </View>
-        
+                <View style={[{ flex: 2, paddingTop: 0, }]}>
+
+                </View>
+
             </View>
         );
 

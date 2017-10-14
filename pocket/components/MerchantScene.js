@@ -25,7 +25,7 @@ class MerchantScene extends Component {
                 <View style={[{ flex: 1.5, alignContent: 'flex-end', justifyContent: 'center' }]}>
                     <View style={[{ flex: .5, alignSelf: 'center', justifyContent: 'center' }]}>
                         <Text style={[globalStyle.gloabalFontStyle_H2]}>
-                            Balance: 40
+                            Balance: {this.props.state.merchantBalance}
                              </Text>
                     </View>
                     <View style={[{ flex: 1, alignSelf: 'center', justifyContent: 'center' }]}>
@@ -44,7 +44,7 @@ class MerchantScene extends Component {
 
                     <ListView
                         style={[{ flex: 1, paddingLeft: 5 }]}
-                        dataSource={this.props.dataSource}
+                        dataSource={this.props.state.dataSource}
                         renderRow={(data) => this.renderRow(data) }
                     />
                 </View>
@@ -52,7 +52,7 @@ class MerchantScene extends Component {
                 <View style={[{ flex: 1.5, alignContent: 'flex-end', justifyContent: 'center', paddingBottom: 50, paddingTop: 5 }]}>
                     <View style={[{ flex: .5, alignSelf: 'center', justifyContent: 'center' }]}>
                         <Text style={[globalStyle.gloabalFontStyle_H3]}>
-                            Total: 40
+                            Total: {this.props.state.merchantTotal}
                              </Text>
                     </View>
                     <View style={[{ flex: 1, alignSelf: 'center', justifyContent: 'center' }]}>

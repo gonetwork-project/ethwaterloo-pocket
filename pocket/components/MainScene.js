@@ -23,9 +23,21 @@ class MainScene extends Component {
         this.state = {
             pageId: UI_PAGE_LOGIN_PAGE,
             selectedUserTypeIndex: 0,
-            userAddress: 'lol3333',
-            merchantItems: [''],
             dataSource: ds.cloneWithRows(['']),
+
+            //User Data
+            userBalance: 0,
+            nextRewardTime: 0,
+            nextRewardTotal: 0,
+            userAddress: 'lol3333',
+
+            //Merchant data
+            merchantBalance: 0,
+            merchantTotal: 0,
+            merchantItems: [''],
+
+            //Parent Data
+            parentBalance: 0,
         };
     }
 
@@ -65,7 +77,8 @@ class MainScene extends Component {
         if (this.state.selectedUserTypeIndex === 0) {
             return (
                 <UserScene
-                    dataSource={this.state.dataSource}
+                    //dataSource={this.state.dataSource}
+                    state={this.state}
                     addMerchantItem={this.addMerchantItem.bind(this)}
                     merchantCheckout={this.merchantCheckout.bind(this)}
 
@@ -74,7 +87,7 @@ class MainScene extends Component {
         } else if (this.state.selectedUserTypeIndex === 1) {
             return (
                 <MerchantScene
-                    dataSource={this.state.dataSource}
+                    state={this.state}
                     addMerchantItem={this.addMerchantItem.bind(this)}
                     merchantCheckout={this.merchantCheckout.bind(this)}
 
@@ -83,6 +96,7 @@ class MainScene extends Component {
         } else if (this.state.selectedUserTypeIndex === 2) {
             return (
                 <ParentScene
+                    state={this.state}
                     createDebitCardAction={this.buttonPressTest.bind(this)}
                     setSpendAction={this.buttonPressTest.bind(this)}
                     fundAction={this.buttonPressTest.bind(this)}
