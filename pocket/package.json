@@ -1,0 +1,8 @@
+{
+  "name": "pocket",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "react-native-scripts": "1.5.0"
+  }
+}
