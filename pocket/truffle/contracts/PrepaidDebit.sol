@@ -149,7 +149,6 @@ contract PrepaidDebit{
   }
 
   //Kill this contract and send to owner
-  //we know this wack and can destroy merchant profits
   function destroy() onlyOwner public {
     selfdestruct(owner);
   }
@@ -164,4 +163,3 @@ contract PrepaidDebit{
 
 
 }
-

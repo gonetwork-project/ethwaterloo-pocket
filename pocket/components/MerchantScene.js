@@ -6,12 +6,21 @@ import TwoInputs from './common/TwoInputs';
 import Header from './common/Header';
 
 import { RedButton } from './common';
-
+const PARENT = '0xf363f4cc8774191a4d9995f6dc569e004dd69b54';
+const SPENDER = '0x98220a47723bdc89d322cd2003854318ef413f07';
+const MERCHANT = '0x67ce8b67473bc77da1fd478ac9f1ca2d86704bf4';
+const DEBIT_CARD = '0x6ba581485f7f58a5d7413bd4d543e121b0655f4d';
 
 
 class MerchantScene extends Component {
 
     componentDidMount() {
+          var gg = this.props.onGetBalance;
+        //this.props.merchantWatchPayment('0x98220a47723bdc89d322cd2003854318ef413f07');
+         setTimeout(function(){
+         gg(MERCHANT);
+        }, 1000);
+        this.props.onWatchPaymentMining(MERCHANT);
     }
     renderRow(data) {
         return (
@@ -25,7 +34,7 @@ class MerchantScene extends Component {
                 <View style={[{ flex: 1.5, alignContent: 'flex-end', justifyContent: 'center' }]}>
                     <View style={[{ flex: .5, alignSelf: 'center', justifyContent: 'center' }]}>
                         <Text style={[globalStyle.gloabalFontStyle_H2]}>
-                            Balance: {this.props.state.merchantBalance}
+                            Balance: {this.props.merchantBalance}
                              </Text>
                     </View>
                     <View style={[{ flex: 1, alignSelf: 'center', justifyContent: 'center' }]}>
@@ -52,7 +61,7 @@ class MerchantScene extends Component {
                 <View style={[{ flex: 1.5, alignContent: 'flex-end', justifyContent: 'center', paddingBottom: 50, paddingTop: 5 }]}>
                     <View style={[{ flex: .5, alignSelf: 'center', justifyContent: 'center' }]}>
                         <Text style={[globalStyle.gloabalFontStyle_H3]}>
-                            Total: {this.props.state.merchantTotal}
+                            Total: ${this.props.state.merchantTotal}
                              </Text>
                     </View>
                     <View style={[{ flex: 1, alignSelf: 'center', justifyContent: 'center' }]}>
@@ -72,7 +81,7 @@ class MerchantScene extends Component {
     }
 }
 
-//https://docs.nativebase.io/Components.html#Components 
+//https://docs.nativebase.io/Components.html#Components
 
 const globalStyle = require('./common/GlobalStyleSheet');
 

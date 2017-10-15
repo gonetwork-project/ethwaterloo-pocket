@@ -21,10 +21,6 @@ module.exports.parse = parse;
  * @private
  */
 
-var formatThousandsRegExp = /\B(?=(\d{3})+(?!\d))/g;
-
-var formatDecimalsRegExp = /(?:\.0*|(\.[^0]+)0+)$/;
-
 var map = {
   b:  1,
   kb: 1 << 10,
@@ -33,18 +29,13 @@ var map = {
   tb: ((1 << 30) * 1024)
 };
 
-var parseRegExp = /^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb)$/i;
-
 /**
- * Convert the given value in bytes into a string or parse to string to an integer in bytes.
+ *Convert the given value in bytes into a string or parse to string to an integer in bytes.
  *
  * @param {string|number} value
  * @param {{
  *  case: [string],
- *  decimalPlaces: [number]
- *  fixedDecimals: [boolean]
  *  thousandsSeparator: [string]
- *  unitSeparator: [string]
  *  }} [options] bytes options.
  *
  * @returns {string|number|null}
@@ -70,54 +61,39 @@ function bytes(value, options) {
  *
  * @param {number} value
  * @param {object} [options]
- * @param {number} [options.decimalPlaces=2]
- * @param {number} [options.fixedDecimals=false]
  * @param {string} [options.thousandsSeparator=]
- * @param {string} [options.unit=]
- * @param {string} [options.unitSeparator=]
- *
- * @returns {string|null}
  * @public
  */
 
-function format(value, options) {
-  if (!Number.isFinite(value)) {
+function format(val, options) {
+  if (typeof val !== 'number') {
     return null;
   }
 
-  var mag = Math.abs(value);
+  var mag = Math.abs(val);
   var thousandsSeparator = (options && options.thousandsSeparator) || '';
-  var unitSeparator = (options && options.unitSeparator) || '';
-  var decimalPlaces = (options && options.decimalPlaces !== undefined) ? options.decimalPlaces : 2;
-  var fixedDecimals = Boolean(options && options.fixedDecimals);
-  var unit = (options && options.unit) || '';
+  var unit = 'B';
+  var value = val;
 
-  if (!unit || !map[unit.toLowerCase()]) {
-    if (mag >= map.tb) {
-      unit = 'TB';
-    } else if (mag >= map.gb) {
-      unit = 'GB';
-    } else if (mag >= map.mb) {
-      unit = 'MB';
-    } else if (mag >= map.kb) {
-      unit = 'KB';
-    } else {
-      unit = 'B';
-    }
-  }
-
-  var val = value / map[unit.toLowerCase()];
-  var str = val.toFixed(decimalPlaces);
-
-  if (!fixedDecimals) {
-    str = str.replace(formatDecimalsRegExp, '$1');
+  if (mag >= map.tb) {
+    value = Math.round(value / map.tb * 100) / 100;
+    unit = 'TB';
+  } else if (mag >= map.gb) {
+    value = Math.round(value / map.gb * 100) / 100;
+    unit = 'GB';
+  } else if (mag >= map.mb) {
+    value = Math.round(value / map.mb * 100) / 100;
+    unit = 'MB';
+  } else if (mag >= map.kb) {
+    value = Math.round(value / map.kb * 100) / 100;
+    unit = 'kB';
   }
 
   if (thousandsSeparator) {
-    str = str.replace(formatThousandsRegExp, thousandsSeparator);
+    value = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, thousandsSeparator);
   }
 
-  return str + unitSeparator + unit;
+  return value + unit;
 }
 
 /**
@@ -126,8 +102,6 @@ function format(value, options) {
  * If no unit is given, it is assumed the value is in bytes.
  *
  * @param {number|string} val
- *
- * @returns {number|null}
  * @public
  */
 
@@ -141,13 +115,13 @@ function parse(val) {
   }
 
   // Test if the string passed is valid
-  var results = parseRegExp.exec(val);
+  var results = val.match(/^((-|\+)?(\d+(?:\.\d+)?)) *(kb|mb|gb|tb)$/i);
   var floatValue;
   var unit = 'b';
 
   if (!results) {
     // Nothing could be extracted from the given string
-    floatValue = parseInt(val, 10);
+    floatValue = parseInt(val);
     unit = 'b'
   } else {
     // Retrieve the value and the unit
@@ -155,5 +129,5 @@ function parse(val) {
     unit = results[4].toLowerCase();
   }
 
-  return Math.floor(map[unit] * floatValue);
+  return map[unit] * floatValue;
 }

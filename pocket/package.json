@@ -1,28 +1,36 @@
 {
-  "name": "pocket",
-  "version": "0.1.0",
+  "name": "TestWebBridge",
+  "version": "0.0.1",
   "private": true,
-  "devDependencies": {
-    "react-native-scripts": "1.5.0",
-    "jest-expo": "^21.0.2",
-    "react-test-renderer": "16.0.0-alpha.12"
-  },
-  "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
   "scripts": {
-    "start": "react-native-scripts start",
-    "eject": "react-native-scripts eject",
-    "android": "react-native-scripts android",
-    "ios": "react-native-scripts ios",
-    "test": "node node_modules/jest/bin/jest.js --watch"
-  },
-  "jest": {
-    "preset": "jest-expo"
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
   },
   "dependencies": {
-    "expo": "^21.0.0",
-    "react": "16.0.0-alpha.12",
-    "react-native": "^0.48.4",
+    "react": "16.0.0-beta.5",
+    "react-native": "0.49.1",
+    "react-native-credit-card-input": "^0.3.3",
     "react-native-discovery": "^0.1.0",
-    "react-native-fingerprint-scanner": "^2.2.0"
+    "react-native-fingerprint-scanner": "^2.2.0",
+    "react-native-nfc": "^0.3.0",
+    "react-native-nfc-manager": "0.0.3",
+    "react-native-webview-bridge": "^0.33.0",
+    "react-native-wkwebview-reborn": "^1.8.0"
+  },
+  "devDependencies": {
+    "babel-jest": "21.2.0",
+    "babel-preset-react-native": "4.0.0",
+    "jest": "21.2.1",
+    "react-test-renderer": "16.0.0-beta.5",
+    "zeppelin-solidity": "*"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "rnpm": {
+    "assets": [
+      "/bower_components",
+      "web3.html"
+    ]
   }
 }

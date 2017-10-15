@@ -1,0 +1,7 @@
+rootProject.name = 'TestWebBridge'
+include ':react-native-nfc'
+project(':react-native-nfc').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-nfc/android')
+include ':react-native-fingerprint-scanner'
+project(':react-native-fingerprint-scanner').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fingerprint-scanner/android')
+
+include ':app'

@@ -6,12 +6,19 @@ import TwoInputs from './common/TwoInputs';
 import Header from './common/Header';
 import { RedButton } from './common';
 
-
+const PARENT = '0xf363f4cc8774191a4d9995f6dc569e004dd69b54';
 
 class ParentScene extends Component {
 
     componentDidMount() {
+          var gg = this.props.onGetBalance;
+        //this.props.merchantWatchPayment('0x98220a47723bdc89d322cd2003854318ef413f07');
+         setTimeout(function(){
+         gg(PARENT);
+        }, 1000);
     }
+
+
     render() {
         const { container, bottomSpace, tosBox } = styles;
         return (
@@ -25,7 +32,7 @@ class ParentScene extends Component {
                     alignItems: 'center',
                 }]}>
                     <Text style={[globalStyle.gloabalFontStyle_H2]}>
-                        Balance: {this.props.state.parentBalance}
+                        Balance: {this.props.parentBalance}
                     </Text>
                 </View>
 
@@ -94,7 +101,7 @@ class ParentScene extends Component {
     }
 }
 
-//https://docs.nativebase.io/Components.html#Components 
+//https://docs.nativebase.io/Components.html#Components
 
 const globalStyle = require('./common/GlobalStyleSheet');
 

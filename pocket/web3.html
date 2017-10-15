@@ -1,0 +1,827 @@
+<html>
+<head>
+<title>
+A Simple HTML Document
+</title>
+</head>
+<body>
+
+<script type="text/javascript" src="bower_components/web3/dist/web3.min.js"></script>
+<script type="text/javascript" src="bower_components/truffle-contract/dist/truffle-contract.min.js"></script>
+
+
+
+<ul id="accounts">
+
+</ul>
+
+<div>
+<input type="text" id="balanceAddr" placeholder="Address"/>
+<button onclick="GetBalanceClick()">balance</button>
+<button onclick="ShowTransactions()">Transactions</button>
+<button onclick="UnlockAccountClick()">Unlock</button>
+</div>
+<br/>
+<br/>
+<p>all the below operations will effect the following debit card</p>
+<input type="text" id="prepaidAddress" placeholder="debit card address" />
+<div>
+<input type="text" id="fromCreate" placeholder="from address"/>
+<input type="text" id="spenderCreate" placeholder="spender"/>
+<input type="text" id="fundCreate" placeholder="fund $(ETH)" />
+<button onclick="CreatePrepaidDebitClick()">Create</button>
+<button onclick="FundPrepaidDebitClick()">FUND</button>
+<button onclick="SetSpenderClick()">Set Spender</button>
+<button onclick="GetCardBalanceClick()">Card Balance</button>
+</div>
+
+
+<br/>
+<div>
+
+<p> all the below function sets a local variable prepaidDebit for  use rather then getting from chain each time.  "Get" pulls the contract from above debit card address and sets local variable for rest of functions</p>
+<button onclick="GetPrepaidDebitClick()">Get and Set Prepaid Address</button>
+
+
+<br/>
+
+<p> spender -> prepaidebit contract allocated to -> merchant </p>
+<input type="text" id="spenderSpend" placeholder="spender address"/>
+<input type="text" id="merchantSpend" placeholder="merchant address"/>
+<input type="text" id="amountSpend" placeholder="amount spend"/>
+<button onclick="SpendClick()">Spend on merchant</button>
+</div>
+<br/>
+<div>
+<p> contract -> merchant </p>
+<input type="text" id="merchantWithdraw" placeholder="merchant address contract will send to"/>
+<button onclick="WithdrawClick()">Withdraw</button>
+<button onclick="PendingWithdrawClick()">Pending Withdrawal Balance</button>
+</div>
+
+<br/>
+<div>
+<p> setup the address to monitor for spends </p>
+<input type="text" id="merchantWatch" placeholder="merchant address that will monitor for SPENT events"/>
+<button onclick="WatchPaymentMiningClick()">Watch for Spent Event</button>
+</div>
+
+<br/>
+<div>
+<p> setup the address to monitor for fund spend </p>
+<input type="text" id="fundWatch" placeholder="merchant address that will monitor for SPENT events"/>
+<button onclick="WatchFundedClick()">Watch for Fund Event</button>
+</div>
+<script type="text/javascript">
+  /**
+ * Sample Web3html
+ * https://github.com/facebook/react-native
+ * @flow
+ * Author: Amit Shah
+ */
+
+  var provider =   new Web3.providers.HttpProvider("http://192.168.0.18:8545");
+
+ //  //this function below craps out because file and http uris collide
+ //  function loadContractJSON(contractURI,callback) {
+
+ //    var xobj = new XMLHttpRequest();
+ //        xobj.overrideMimeType("application/json");
+ //    xobj.open('GET', contractURI, true); // Replace 'my_data' with the path to your file
+ //    xobj.onreadystatechange = function () {
+ //          if (xobj.readyState == 4 && xobj.status == "200") {
+ //            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+ //            callback(xobj.responseText);
+ //          }
+ //    };
+ //    xobj.send(null);
+ // }
+
+ //we should consider the following:https://github.com/trufflesuite/truffle/issues/192
+ //https://ethereum.stackexchange.com/questions/11030/how-can-i-deploy-a-contract-with-reference-to-a-library-contract-without-using-a
+ //TODO:Consider building a linker for web
+ //var contractSource =
+//{
+//   "contract_name": "ConvertLib",
+//   "abi": [
+//     {
+//       "constant": false,
+//       "inputs": [
+//         {
+//           "name": "amount",
+//           "type": "uint256"
+//         },
+//         {
+//           "name": "conversionRate",
+//           "type": "uint256"
+//         }
+//       ],
+//       "name": "convert",
+//       "outputs": [
+//         {
+//           "name": "convertedAmount",
+//           "type": "uint256"
+//         }
+//       ],
+//       "payable": false,
+//       "type": "function"
+//     }
+//   ],
+//   "unlinked_binary": "0x60606040523415600e57600080fd5b5b60908061001d6000396000f300606060405263ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166396e4ee3d8114603c575b600080fd5b6048600435602435605a565b60405190815260200160405180910390f35b8181025b929150505600a165627a7a72305820178e7a7ee8f7aa323d431887b2bed467a91201fb7b3f312149afe384a4adcb310029",
+//   "networks": {},
+//   "schema_version": "0.0.5",
+//   "updated_at": 1507694852188
+// };
+
+
+  prepaidDebitSource =
+  {
+  "contract_name": "PrepaidDebit",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "pendingWithdrawal",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "rewardCondition",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "toggleContractActive",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "Withdraw",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": true,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "Fund",
+      "outputs": [],
+      "payable": true,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "ClaimReward",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "destroy",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newSpender",
+          "type": "address"
+        }
+      ],
+      "name": "SetSpender",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "Ownable",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_merchant",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Spend",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "prev_total_balance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "reward_timestamp",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "total_balance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "total_reward",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_recipient",
+          "type": "address"
+        }
+      ],
+      "name": "destroyAndSend",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GetContractBalance",
+      "outputs": [
+        {
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": true,
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardClaimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "AccountFunded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_merchant",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "Spent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_merchant",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "AccountDebited",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x60606040526000805460ff191690555b60068054600160a060020a03191633600160a060020a0316179055346001555b5b6108f18061003f6000396000f300606060405236156101045763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630964c95b811461010957806310febb171461013a5780631385d24c14610161578063313ce5671461017657806357ea89b61461019f5780636ce1417e146101bb57806379372f9a146101c557806383197ef0146101da5780638991874b146101ef5780638afc3605146102105780638da5cb5b14610225578063aeba908714610254578063b69d91ad14610278578063c38e75ee1461029d578063d2ff791f146102c2578063d3d2172e146102e7578063f2fde38b1461030c578063f5074f411461032d578063f6d0bf2f1461034e575b600080fd5b341561011457600080fd5b610128600160a060020a0360043516610373565b60405190815260200160405180910390f35b341561014557600080fd5b61014d610385565b604051901515815260200160405180910390f35b341561016c57600080fd5b6101746103bc565b005b341561018157600080fd5b6101896103ed565b60405160ff909116815260200160405180910390f35b61014d6103f2565b604051901515815260200160405180910390f35b610174610502565b005b34156101d057600080fd5b610174610599565b005b34156101e557600080fd5b610174610638565b005b34156101fa57600080fd5b610174600160a060020a0360043516610664565b005b341561021b57600080fd5b6101746106c6565b005b341561023057600080fd5b6102386106f1565b604051600160a060020a03909116815260200160405180910390f35b341561025f57600080fd5b610174600160a060020a0360043516602435610700565b005b341561028357600080fd5b6101286107da565b60405190815260200160405180910390f35b34156102a857600080fd5b6101286107e0565b60405190815260200160405180910390f35b34156102cd57600080fd5b6101286107e6565b60405190815260200160405180910390f35b34156102f257600080fd5b6101286107ec565b60405190815260200160405180910390f35b341561031757600080fd5b610174600160a060020a03600435166107f2565b005b341561033857600080fd5b610174600160a060020a036004351661088b565b005b341561035957600080fd5b6101286108b6565b60405190815260200160405180910390f35b60056020526000908152604090205481565b60045460009042101561039757600080fd5b6002546064906032025b04600254600154031115156103b557600080fd5b5060015b90565b60065433600160a060020a039081169116146103d757600080fd5b6000805460ff19811660ff909116151790555b5b565b601281565b60008054819060ff1615156104fc57600160a060020a0333166000908152600560205260408120541161042457600080fd5b600160a060020a0333811660009081526005602052604090205430909116311161044d57600080fd5b50600160a060020a033316600081815260056020526040808220805492905590919082156108fc0290839051600060405180830381858888f19350505050151561049657600080fd5b6000547f373a43454a101f85d451cfffa33ad4602d87b4eeff3595b29b67c4f5c225261a906101009004600160a060020a03163383604051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a1600191505b5b5b5090565b60005460ff1615156103ea576000341161051b57600080fd5b60015460028190555034600154016001819055507f291f84cc50460ba253dd410dfb3142a5f89d5d3e95bcbcb3c3739fc60abe10f8600060019054906101000a9004600160a060020a03163334604051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b5b5b565b60006105a3610385565b15156105ae57600080fd5b50600380546000918290556001805482019055620d2f0042908101600455915460065491927f0aa4d283470c904c551d18bb894d37e17674920f3261a7f854be501e25f421b792600160a060020a036101009093048316921690604051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b50565b60065433600160a060020a0390811691161461065357600080fd5b600654600160a060020a0316ff5b5b565b60065433600160a060020a0390811691161461067f57600080fd5b600160a060020a038116151561069457600080fd5b6000805474ffffffffffffffffffffffffffffffffffffffff001916610100600160a060020a038416021790555b5b50565b6006805473ffffffffffffffffffffffffffffffffffffffff191633600160a060020a03161790555b565b600654600160a060020a031681565b60005460ff1615156107d45760005433600160a060020a03908116610100909204161461072c57600080fd5b600154811061073a57600080fd5b600160a060020a03301631811061075057600080fd5b600180548290039055600160a060020a0380831660009081526005602052604080822080548501905590547fc18352ae46a2296c951b2256c5ebc5b4546e6222fea2e4f36e824db9d44eb7ec9261010090910416908490849051600160a060020a039384168152919092166020820152604080820192909252606001905180910390a15b5b5b5050565b60025481565b60045481565b60015481565b60035481565b60065433600160a060020a0390811691161461080d57600080fd5b600160a060020a038116151561082257600080fd5b600654600160a060020a0380831691167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a36006805473ffffffffffffffffffffffffffffffffffffffff1916600160a060020a0383161790555b5b50565b60065433600160a060020a039081169116146108a657600080fd5b80600160a060020a0316ff5b5b50565b600160a060020a033016315b905600a165627a7a72305820ce0eb5dc4a96f3f29833cca42cb53044feca2cfde05ecf486a5fd8de712e148b0029",
+  "networks": {},
+  "schema_version": "0.0.5",
+  "updated_at": 1507877252732
+}
+
+  var ACCOUNT_INDEX = 2;
+  var ACCOUNT_MERCHANT_INDEX = 1;
+  var ACCOUNT_PW = "testpass";
+  var ME = null;
+  ///usr/local/Cellar/geth/1.7.1/bin/geth --testnet rpcapi "eth,net,web3,shh,personal" --rpcaddr 127.0.0.1 --rpcport 8545   --shh --rpc --ws  --rpccorsdomain '*' --wsorigins="*" console
+  // try{
+  //   var websocket = new Web3(new Web3.providers.WebsocketProvider("ws://127.0.0.1:8546"));
+  // }catch(e){
+  //   alert(e);
+  // }
+
+  if (!('toJSON' in Error.prototype))
+      Object.defineProperty(Error.prototype, 'toJSON', {
+          value: function () {
+              var alt = {};
+
+              Object.getOwnPropertyNames(this).forEach(function (key) {
+                  alt[key] = this[key];
+              }, this);
+              alt['ERROR'] = 1;
+              return alt;
+          },
+          configurable: true,
+          writable: true
+  });
+  CallbackHandler = function(data){
+    alert(JSON.stringify(data));
+  }
+
+
+  // var web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.0.16:8545"));
+  var web3 = new Web3(provider);
+  if(web3){
+      try
+      {
+        var accounts = web3.eth.accounts;
+        for(var i=0; i < accounts.length; i++){
+          var node = document.createElement("LI");
+          var textnode = document.createTextNode(accounts[i]);
+          node.appendChild(textnode);
+          document.getElementById("accounts").appendChild(node);
+        }
+      }catch(e){
+        CallbackHandler(e);
+      }
+
+  }else{
+    CallbackHandler({type:"CONNECTION_ERROR"});
+  }
+
+  function GetAccounts(){
+    CallbackHandler({type:"GET_ACCOUNTS", "value":web3.eth.accounts,
+      "func":arguments.callee.name});
+  }
+
+  function UnlockAccount(address, password){
+    try{
+      var result = web3.personal.unlockAccount(address,password);
+      CallbackHandler({type:"UNLOCK_ACCOUNT","value":result,"func":arguments.callee.name});
+    }catch(err){
+      CallbackHandler(err);
+    }
+  }
+
+  function GetBalance(address){
+    try{
+      var balance = web3.eth.getBalance(address);
+      CallbackHandler({type:"ADDRESS_BALANCE", value:{"address":address,balance:balance,"func":arguments.callee.name} });
+    }catch(err){
+      CallbackHandler(err);
+    }
+  }
+
+  function GetCardBalance(cardAddress){
+     PrepaidDebit.at(cardAddress).then(function(instance){
+      var pp = instance;
+      pp.total_balance.call().then(function(result){
+        CallbackHandler({type:"CARD_BALANCE",value:result,"func":arguments.callee.name})
+
+      }).catch(function(err){
+        CallbackHandler(err);
+      });
+    })
+  }
+
+  function CreatePrepaidDebit(from){
+    PrepaidDebit.new({from:from, gas:8712388}).then(function(instance){
+      CallbackHandler({type:"CREATE_CARD",value:instance.address,"func":arguments.callee.name});
+      document.getElementById("prepaidAddress").value = instance.address;
+    }).catch(function(err){
+      CallbackHandler(err);
+    });
+  }
+
+  function FundPrepaidDebit(from,debitAddress,fund){
+    try{
+      PrepaidDebit.at(debitAddress).then(function(instance){
+        var pp = instance;
+        pp.Fund({'from':from,value:fund}).then(function(prom){
+          return pp.GetContractBalance.call({from:from});
+        }).then(function(val){
+          //TDOD: Put event name
+          CallbackHandler({"type":"FUND", "value":{"fund":fund, "newBalance":val},"func":arguments.callee.name})
+        }).catch(function(err){
+          CallbackHandler(err);
+        });
+      });
+    }catch(e){
+      CallbackHandler(err);
+    }
+  }
+
+  function Withdraw(debitAddress,merchant){
+     try{
+        PrepaidDebit.at(debitAddress).then(function(instance){
+         instance.Withdraw({from:merchant}).then(function(p){
+          web3.eth.getBalance(merchant,function(err,newBalance){
+            if(err){
+              CallbackHandler(err);
+            }else{
+              CallbackHandler({"type":"WITHRDRAW","value":{"newBalance":newBalance},"func":arguments.callee.name});
+            }
+            });
+          }).catch(CallbackHandler);
+       }).catch(CallbackHandler);
+    }catch(err){
+      CallbackHandler(err);
+    }
+
+  }
+
+  function PendingWithdrawal(debitAddress,merchant){
+    try{
+        PrepaidDebit.at(debitAddress).then(function(instance){
+         return instance.pendingWithdrawal.call(merchant)
+       }).catch(CallbackHandler)
+        .then(function(amount){
+          CallbackHandler({type:"PENDING_WITHDRAWAL",
+            value:{"amount":amount, "debitAddress":debitAddress},"func":arguments.callee.name});
+        })
+
+    }catch(err){
+      CallbackHandler(err);
+    }
+  }
+
+  function SetSpender(from,spender,debitAddress){
+    PrepaidDebit.at(debitAddress).then(function(pp){
+      pp.SetSpender(spender, {from:from}).then(function(p){
+        //TODO: put event name
+        CallbackHandler({type:"SPENDER_SET","value":true,"func":arguments.callee.name});
+
+      }).catch(function(err){
+        CallbackHandler(err);
+      });
+    }).catch(function(err){
+      CallbackHandler(err);
+    })
+
+  }
+
+  function Spend(spender,merchant,debitAddress,amount){
+    alert("WE WANT TO SPEND:"+ JSON.stringify(arguments));
+    PrepaidDebit.at(debitAddress).then(function(instance){
+      var pp = instance;
+      pp.Spend(merchant,amount,{from:spender}).then(function(p){
+        return pp.pendingWithdrawal.call(merchant)
+      }).then(function(v){
+        CallbackHandler({"type":"SPEND",
+          value:merchant + " has a pending withdrawl of: "+JSON.stringify(v)})
+
+      }).catch(function(err){
+        CallbackHandler(err);
+      })
+    }).catch(function(err){
+      CallbackHandler(err);
+    });
+
+  }
+
+  function WatchPaymentMining(address){
+
+    try{
+     if(filter){
+      filter.stopWatching();
+     }
+
+      filter = web3.eth.filter({
+        fromBlock: 'latest',
+        toBlock: 'latest',
+        topics:[web3.sha3("Spent(address,address,uint256)")]});
+      filter.watch(function(err,data){
+        var params = data.data.split(/0{24}/).filter(Boolean);
+
+        if(params && params.length === 4 && (params[0]+params[2]) === address){
+
+          CallbackHandler(
+            {"type":"WITHRDRAW_PENDING",
+            "value":{
+              "amount":parseInt(params[0]+params[3]),
+              "from": params[0]+params[1],
+              "debitAddress": data.address
+            }});
+          }
+        });
+
+    }catch(e){
+      CallbackHandler(e);
+    }
+    CallbackHandler({"type":"WITHRDRAW_PENDING_FILTER",value:true})
+  }
+
+  fundFilter = null;
+  function WatchFunded(funder){
+
+    try{
+     if(fundFilter){
+      fundFilter.stopWatching();
+     }
+
+      fundFilter = web3.eth.filter({
+        fromBlock: 'latest',
+        toBlock: 'latest',
+        topics:[web3.sha3("AccountFunded(address,address,uint256)")]});
+      fundFilter.watch(function(err,data){
+        var params = data.data.split(/0{24}/).filter(Boolean);
+
+        if(params && params.length === 4 && (params[0]+params[2]) === funder){
+          CallbackHandler({"type":"FUNDED_CARD",
+            value:parseInt(params[0]+params[3])+" $ was authorized from:" + params[0]+params[1] + ", please Withdraw from debit card:" + data.address});
+          }
+        });
+
+    }catch(e){
+      CallbackHandler(e);
+    }
+    CallbackHandler({"type":"FUND_FILTER",value:true})
+  }
+
+
+  function GetCardBalanceClick(){
+    var from = document.getElementById("balanceAddr").value;
+    var pp = document.getElementById("prepaidAddress").value;
+    GetCardBalance(pp);
+  }
+
+  function GetBalanceClick(){
+      var account = document.getElementById("balanceAddr").value;
+      var balance = GetBalance(account);
+  }
+
+
+  function UnlockAccountClick(){
+    var account = document.getElementById("balanceAddr").value;//web3.eth.accounts[ACCOUNT_INDEX];
+    var result = UnlockAccount(account,ACCOUNT_PW);
+
+  }
+
+  //Contract Factory
+  PrepaidDebit = null;
+  PrepaidDebit= TruffleContract(prepaidDebitSource);
+  PrepaidDebit.setProvider(provider);
+  //debit card instance
+  prepaidDebit = null;
+
+  function CreatePrepaidDebitClick(){
+    var _from = document.getElementById("fromCreate").value;
+    CreatePrepaidDebit(_from);
+  }
+
+
+
+  function SetSpenderClick(){
+    var _from = document.getElementById("fromCreate").value;
+    var _spender = document.getElementById("spenderCreate").value;
+    var addr = document.getElementById("prepaidAddress").value;
+    SetSpender(_from,_spender,addr);
+
+
+
+  }
+
+  function FundPrepaidDebitClick(){
+      var from = document.getElementById('fromCreate').value;
+      var addr = document.getElementById('prepaidAddress').value;
+      var fund = parseInt(document.getElementById('fundCreate').value);
+      FundPrepaidDebit(from,addr,fund);
+  }
+
+  function GetPrepaidDebitClick(){
+    var addr = document.getElementById('prepaidAddress').value;
+    PrepaidDebit.at(addr).then(function  (instance) {
+      prepaidDebit = instance;
+      alert(JSON.stringify({"EVENT":"FOUND", "ADDRESS":instance.address}));
+
+    });
+  }
+
+  function WithdrawClick(){
+    var merchant = document.getElementById("merchantWithdraw").value;
+    Withdraw(prepaidDebit.address, merchant);
+  }
+  function PendingWithdrawClick(){
+    var merchant = document.getElementById("merchantWithdraw").value;
+    PendingWithdrawal(prepaidDebit.address, merchant);
+  }
+
+  function SpendClick(){
+    var spender = document.getElementById("spenderSpend").value;
+    var merchant = document.getElementById("merchantSpend").value;
+    var amount = parseInt(document.getElementById("amountSpend").value);
+
+    Spend(spender,merchant,prepaidDebit.address, amount);
+  }
+
+
+
+  var filter;
+
+  function WatchPaymentMiningClick(){
+    var watchAccount = document.getElementById('merchantWatch').value;
+    WatchPaymentMining(watchAccount);
+  }
+
+   function WatchFundedClick(){
+    var watchAccount = document.getElementById('fundWatch').value;
+    WatchFunded(watchAccount);
+  }
+
+
+  function ShowTransactions(){
+    alert(JSON.stringify(TX_HASH));
+  };
+
+</script>
+
+</body>
+
+</html>
